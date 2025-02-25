@@ -1,4 +1,4 @@
-type paymentMethod = 'online' | 'cash';
+export type paymentMethod = 'online' | 'cash';
 
 // Интерфейс товара
 export interface IProductItem {
