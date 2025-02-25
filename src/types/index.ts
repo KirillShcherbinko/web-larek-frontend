@@ -10,12 +10,6 @@ export interface IProductItem {
   price: number | null; // Товар может быть бесценным
 }
 
-// Интерфейс для корзины с товарами
-export interface IBasket {
-  items: IProductItem[];
-  total: number;
-}
-
 // Интефейс для формы заказа
 export interface IOrderForm {
   payment: paymentMethod;
