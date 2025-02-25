@@ -1,3 +1,5 @@
+type paymentMethod = 'online' | 'cash';
+
 // Интерфейс товара
 export interface IProductItem {
   id: string;
@@ -16,7 +18,7 @@ export interface IBasket {
 
 // Интефейс для формы заказа
 export interface IOrderForm {
-  payment: string;
+  payment: paymentMethod;
   address: string;
   email: string;
   phone: string;
