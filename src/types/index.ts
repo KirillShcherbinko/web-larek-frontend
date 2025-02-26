@@ -31,6 +31,12 @@ export interface IOrder {
   items: IProductItem[];
 }
 
+// Интерфейс для модели API
+export interface IService {
+  getProductList(): Promise<IProductItem[]>;
+  postOrder(): Promise<IOrderResult>;
+}
+
 // Интерфейс результата заказа, который отправляет сервер в результате post запроса
 export interface IOrderResult {
   id: string;
