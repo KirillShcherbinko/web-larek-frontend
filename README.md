@@ -116,7 +116,7 @@ export interface IView {
 export interface IEvents {
     on<T extends object>(event: EventName, callback: (data: T) => void): void;  // Обработка событий event 
     emit<T extends object>(event: string, data?: T): void;  // Вызывает событие
-    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void; // Создаёт и возвращает функцию, которая будет вызывать event с переданными данными.
+    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void; // Генерация события при вызове
 }
 ```
 ## Структура базового кода:
