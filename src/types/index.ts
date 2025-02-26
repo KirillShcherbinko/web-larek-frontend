@@ -1,18 +1,23 @@
-export type paymentMethod = 'online' | 'cash';
+export type PaymentMethod = 'online' | 'cash';
+export type Category = 'софт-скил'
+                        | 'другое'
+                        | 'дополнительное'
+                        | 'кнопка' 
+                        | 'хард-скил';
 
 // Интерфейс товара
 export interface IProductItem {
   id: string;
   description: string;
   title: string;
-  category: string;
+  category: Category;
   image: string;
   price: number | null; // Товар может быть бесценным
 }
 
 // Интефейс для формы заказа
 export interface IOrderForm {
-  payment: paymentMethod;
+  payment: PaymentMethod;
   address: string;
   email: string;
   phone: string;
