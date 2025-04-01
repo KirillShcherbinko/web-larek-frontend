@@ -36,8 +36,8 @@ export interface IOrder {
 
 // Интерфейс для модели API
 export interface IService {
-  getProductList(): Promise<IProductItem[]>;
-  postOrder(): Promise<IOrderResult>;
+  getProductList: () =>  Promise<IProductItem[]>;
+  postOrder: () => Promise<IOrderResult>;
 }
 
 // Интерфейс результата заказа, который отправляет сервер в результате post запроса
@@ -46,12 +46,21 @@ export interface IOrderResult {
   total: number;
 }
 
+export interface IOrderResultActions {
+  onClick: () => void;
+}
+
 // Интерфейс для обработки действий
-export interface IAction {
-  onClick(event?: MouseEvent): void;
+export interface IProductAction {
+  onClick: (event?: MouseEvent) => void;
 } 
 
 // Интерфейс для обработки отображения
 export interface IView {
   render(data?: object): HTMLElement;
+}
+
+// Интерфейс для каталога
+export interface ICatalog {
+  items: HTMLElement[];
 }

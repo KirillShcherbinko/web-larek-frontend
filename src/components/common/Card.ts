@@ -1,13 +1,14 @@
-import { Category, IAction, IProductItem } from "../../types";
+import { Category, IProductAction, IProductItem } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 
 export class Card extends Component<IProductItem> {
-  protected _description: HTMLElement;
   protected _title: HTMLElement;
+  protected _description: HTMLElement;
   protected _category: HTMLElement;
   protected _image: HTMLImageElement;
   protected _price: HTMLElement;
+  protected _button: HTMLButtonElement;
 
   protected _categoryClassNames = <Record<string, string>>{
 		'дополнительное': 'additional',
@@ -17,19 +18,24 @@ export class Card extends Component<IProductItem> {
 		'другое': 'other',
 	};
 
-  constructor(protected blockName: string, container: HTMLElement, actions?: IAction, categoryName?: Category) {
+  constructor(protected blockName: string, container: HTMLElement, actions?: IProductAction, categoryName?: Category) {
     super(container);
 
     this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-    this._description = ensureElement<HTMLElement>(`.${blockName}__description`, container);
-    this._category = ensureElement<HTMLElement>(
-      `.${blockName}__category .${blockName}__category_${this._categoryClassNames[categoryName]}`, container
-    );
-    this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
+    this._description = container.querySelector(`.${blockName}__text`);
+    this._category = container.querySelector(`.${blockName}__category`);
+    this._image = container.querySelector(`.${blockName}__image`);
     this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
+    this._button = container.querySelector('.button');
+
+    this._category.classList.add(`${blockName}__category_${this._categoryClassNames[categoryName]}`)
 
     if (actions?.onClick) {
-			this.container.addEventListener('click', actions.onClick);
+      if (this._button) {
+        this._button.addEventListener('click', actions.onClick);
+      } else {
+        this.container.addEventListener('click', actions.onClick);
+      }
 		}
   }
 
@@ -61,7 +67,11 @@ export class Card extends Component<IProductItem> {
     this.setImage(this._image, image, this.title);
   }
 
-  set price(price: number) {
-    this.setText(this._price, price);
+  set price(price: number | null) {
+    if (price) this.setText(this._price, `${price} синапсов`);
+    else {
+      this.setText(this._price, 'Бесценно');
+      this.setDisabled(this._button, true);
+    }
   }
 }
