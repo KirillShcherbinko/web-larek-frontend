@@ -8,10 +8,10 @@ export type Category = 'софт-скил'
 // Интерфейс товара
 export interface IProductItem {
   id: string;
-  description: string;
+  description?: string;
   title: string;
-  category: Category;
-  image: string;
+  category?: Category;
+  image?: string;
   price: number | null; // Товар может быть бесценным
 }
 
@@ -21,8 +21,11 @@ export interface IOrderForm {
   address: string;
   email: string;
   phone: string;
-  validateDelivery(): boolean;
-  validateContacts(): boolean;
+}
+
+export interface IFormState {
+  valid: boolean;
+  errors: string[];
 }
 
 // Интефейс самого заказа
