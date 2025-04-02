@@ -1,4 +1,3 @@
-export type PaymentMethod = 'online' | 'cash';
 export type Category = 'софт-скил'
                         | 'другое'
                         | 'дополнительное'
@@ -15,13 +14,18 @@ export interface IProductItem {
   price: number | null; // Товар может быть бесценным
 }
 
-// Интефейс для формы заказа
-export interface IOrderForm {
-  payment: PaymentMethod;
+export interface IDeliveryForm {
+  payment: string;
   address: string;
+}
+
+export interface IContactForm {
   email: string;
   phone: string;
 }
+
+// Интефейс для формы заказа
+export type IOrderForm = IDeliveryForm & IContactForm;
 
 export interface IFormState {
   valid: boolean;
@@ -33,6 +37,8 @@ export interface IOrder {
   total: number;
   items: IProductItem[];
 }
+
+export type IOrderLot = IOrder & IOrderForm;
 
 // Интерфейс для модели API
 export interface IService {
@@ -71,3 +77,5 @@ export interface IBasket {
 	total: number;
 	selected: string[];
 }
+
+export type FormErrors = Partial<Record<keyof IOrderForm, string>>;

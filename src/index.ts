@@ -1,4 +1,4 @@
-import { Category } from './types/index';
+import { Category, IDeliveryForm, IOrderForm } from './types/index';
 import { EventEmitter } from './components/base/events';
 import { Modal } from './components/common/Modal';
 import { Wrapper } from './components/common/Wrapper';
@@ -14,6 +14,9 @@ import { BasketHeader } from './components/modules/Basket/BasketHeader';
 import { BasketCounter } from './components/modules/Basket/BasketCounter';
 import { BasketItem } from './components/modules/Basket/BasketItem';
 import { Basket } from './components/modules/Basket/Basket';
+import { OrderDelivery } from './components/modules/Order/OrderDelivery';
+import { OrderContacts } from './components/modules/Order/OrderContacts';
+import { add } from 'lodash';
 
 const events = new EventEmitter();
 const serviceModel = new ServiceModel(CDN_URL, API_URL);
@@ -29,7 +32,7 @@ const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const cardCBasketTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
-const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const deliveryTemplate = ensureElement<HTMLTemplateElement>('#order');
 const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 
 
@@ -47,7 +50,8 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 ////////// Переиспользуемые интерфейсы //////////
 const basket = new Basket(cloneTemplate(basketTemplate), events);
-
+const delivery = new OrderDelivery(cloneTemplate(deliveryTemplate), events);
+const contacts = new OrderContacts(cloneTemplate(contactsTemplate), events);
 
 ////////// Отрисовка модальных окон //////////
 events.on('modal:open', () => {
@@ -135,6 +139,45 @@ events.on('basket:changed', () => {
   basket.selected = appState.basket.items.length === 0;
   basket.total = appState.basket.getTotal(appState.catalog);
 });
+
+////////// События для оформления заказа //////////
+events.on('delivery:open', () => {
+  modal.render({
+		content: delivery.render({
+			payment: '',
+			address: '',
+			valid: false,
+			errors: [],
+		}),
+	});
+});
+
+events.on(
+	/^order\..*:change/,
+	(data: { field: keyof IDeliveryForm; value: string }) => {
+		appState.order.setDeliveryField(data.field, data.value);
+		appState.form.validateDelivery(appState.order.data);
+	}
+);
+
+events.on('deliveryFormErrors:change', (errors: Partial<IOrderForm>) => {
+	const { payment, address } = errors;
+	delivery.valid = !payment && !address;
+	delivery.errors = Object.values({ payment, address })
+		.filter((i) => !!i)
+		.join('; ');
+});
+
+events.on('contacts:open', () => {
+  modal.render({
+		content: contacts.render({
+			email: '',
+			phone: '',
+			valid: false,
+			errors: [],
+		}),
+	});
+})
 
 ////////// Получение даннных с сервера //////////
 serviceModel
