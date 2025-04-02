@@ -1,4 +1,4 @@
-import { IProductItem, IOrder, IOrderForm, IDeliveryForm, IContactForm, IOrderLot } from './../../types/index';
+import { IProductItem, IDeliveryForm, IContactForm, IOrderLot } from './../../types/index';
 import { Model } from '../base/Model';
 import _ from 'lodash';
 
@@ -14,6 +14,11 @@ export class OrderModel extends Model<IProductItem> {
 
 	setDeliveryField(field: keyof IDeliveryForm, value: string) {
 		this.data[field] = value;
-		this.events.emit('delivery:ready', this.data);
+		this.events.emit('order:ready', this.data);
+	}
+
+  setContactsField(field: keyof IContactForm, value: string) {
+		this.data[field] = value;
+		this.events.emit('contacts:ready', this.data);
 	}
 }

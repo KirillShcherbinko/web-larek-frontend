@@ -35,7 +35,7 @@ export interface IFormState {
 // Интефейс самого заказа
 export interface IOrder {
   total: number;
-  items: IProductItem[];
+  items: string[];
 }
 
 export type IOrderLot = IOrder & IOrderForm;

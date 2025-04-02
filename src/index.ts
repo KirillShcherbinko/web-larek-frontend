@@ -1,4 +1,4 @@
-import { Category, IDeliveryForm, IOrderForm } from './types/index';
+import { Category, IContactForm, IDeliveryForm, IOrderForm } from './types/index';
 import { EventEmitter } from './components/base/events';
 import { Modal } from './components/common/Modal';
 import { Wrapper } from './components/common/Wrapper';
@@ -17,6 +17,7 @@ import { Basket } from './components/modules/Basket/Basket';
 import { OrderDelivery } from './components/modules/Order/OrderDelivery';
 import { OrderContacts } from './components/modules/Order/OrderContacts';
 import { add } from 'lodash';
+import { Plug } from './components/common/Plug';
 
 const events = new EventEmitter();
 const serviceModel = new ServiceModel(CDN_URL, API_URL);
@@ -136,8 +137,12 @@ events.on('basket:changed', () => {
     })
   });
 
+
   basket.selected = appState.basket.items.length === 0;
   basket.total = appState.basket.getTotal(appState.catalog);
+
+  appState.order.data.items = appState.basket.items; 
+  appState.order.data.total = appState.basket.getTotal(appState.catalog);
 });
 
 ////////// События для оформления заказа //////////
@@ -177,7 +182,51 @@ events.on('contacts:open', () => {
 			errors: [],
 		}),
 	});
-})
+});
+
+events.on(
+	/^contacts\..*:change/,
+	(data: { field: keyof IContactForm; value: string }) => {
+		appState.order.setContactsField(data.field, data.value);
+		appState.form.validateContacts(appState.order.data);
+	}
+);
+
+events.on('contactsFormErrors:change', (errors: Partial<IOrderForm>) => {
+	const { email, phone } = errors;
+	contacts.valid = !email && !phone;
+	contacts.errors = Object.values({ email, phone })
+		.filter((i) => !!i)
+		.join('; ');
+});
+
+events.on('order:submit', () => {
+    events.emit('contacts:open');
+  }
+)
+
+events.on('contacts:submit', () => {
+  serviceModel.postValidatedOrderData(appState.order.data)
+		.then((result) => {
+			const success = new Plug(cloneTemplate(successTemplate), {
+				onClick: () => {
+					modal.close();
+				},
+			}, result.total);
+			appState.clear();
+			basketCounter.counter = 0;
+			events.emit('catalog:changed');
+
+			modal.render({
+				content: success.render({}),
+			});
+		})
+		.catch((err) => {
+			console.error(err);
+		});
+  }
+);
+
 
 ////////// Получение даннных с сервера //////////
 serviceModel

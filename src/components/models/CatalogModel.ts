@@ -13,6 +13,10 @@ export class CatalogModel extends Model<IProductItem> {
 		this.events.emit('catalog:changed');
 	}
 
+	deleteItem(id: string) {
+		this.items = this.items.filter(item => item.id !== id);
+	}
+
 	findById(id: string): IProductItem | undefined {
     return this._items.find(item => item.id === id);
   }

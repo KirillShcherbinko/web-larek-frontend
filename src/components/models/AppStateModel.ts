@@ -28,4 +28,16 @@ export class AppStateModel extends Model<{}> {
     this.preview = item.id;
     this.events.emit('preview:changed', item);
   }
+
+  clear() {
+    this.order.data.items.forEach(id => {
+      this.basket.deleteItem(id);
+      this.catalog.deleteItem(id);
+      this.order.setDeliveryField('payment', '');
+      this.order.setDeliveryField('address', '');
+      this.order.setContactsField('email', '');
+      this.order.setContactsField('phone', '');
+      this.order.data.total = 0;
+    });
+  }
 }
