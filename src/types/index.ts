@@ -64,3 +64,10 @@ export interface IView {
 export interface ICatalog {
   items: HTMLElement[];
 }
+
+// Интерфейс для корзины
+export interface IBasket {
+	items: HTMLElement[];
+	total: number;
+	selected: string[];
+}

@@ -28,7 +28,12 @@ export class Card extends Component<IProductItem> {
     this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
     this._button = container.querySelector('.button');
 
-    this._category.classList.add(`${blockName}__category_${this._categoryClassNames[categoryName]}`)
+    if (this._category) {
+      Object.values(this._categoryClassNames).forEach(className => {
+        this._category.classList.remove(`${blockName}__category_${className}`);
+      });
+      this._category.classList.add(`${blockName}__category_${this._categoryClassNames[categoryName]}`);
+    }
 
     if (actions?.onClick) {
       if (this._button) {

@@ -12,4 +12,8 @@ export class CatalogModel extends Model<IProductItem> {
 		this._items = items;
 		this.events.emit('catalog:changed');
 	}
+
+	findById(id: string): IProductItem | undefined {
+    return this._items.find(item => item.id === id);
+  }
 }

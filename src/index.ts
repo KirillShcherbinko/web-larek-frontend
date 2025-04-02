@@ -9,7 +9,11 @@ import { CatalogItem } from './components/modules/Catalog/CatalogItem';
 import './scss/styles.scss';
 import { IProductItem } from './types';
 import { CDN_URL, API_URL } from './utils/constants';
-import { cloneTemplate, ensureElement } from './utils/utils';
+import { cloneTemplate, createElement, ensureElement } from './utils/utils';
+import { BasketHeader } from './components/modules/Basket/BasketHeader';
+import { BasketCounter } from './components/modules/Basket/BasketCounter';
+import { BasketItem } from './components/modules/Basket/BasketItem';
+import { Basket } from './components/modules/Basket/Basket';
 
 const events = new EventEmitter();
 const serviceModel = new ServiceModel(CDN_URL, API_URL);
@@ -21,21 +25,29 @@ events.onAll(({ eventName, data }) => {
 
 ////////// Шаблоны //////////
 const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
-const cardSuccessTemplate = ensureElement<HTMLTemplateElement>('#success');
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
-const cardCBasketTemplate = ensureElement<HTMLTemplateElement>('#basket');
-const cardOrderTemplate = ensureElement<HTMLTemplateElement>('#order');
-const cardContactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
+const cardCBasketTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 
 
 
 // Модель данных приложения
 const appState = new AppStateModel(events);
 
+////////// Глобальные контейнеры //////////
+const basketHeader = new BasketHeader(document.body, events);
+const basketCounter = new BasketCounter(document.body);
 const catalog = new Catalog(document.body);
 const wrapper = new Wrapper(document.body);
 
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
+
+////////// Переиспользуемые интерфейсы //////////
+const basket = new Basket(cloneTemplate(basketTemplate), events);
+
 
 ////////// Отрисовка модальных окон //////////
 events.on('modal:open', () => {
@@ -68,10 +80,15 @@ events.on('item:select', (item: IProductItem) => {
 ////////// Появление модального окна карточки //////////
 events.on('preview:changed', (item: IProductItem) => {
   const showItem = (item: IProductItem) => {
-    console.log(cardPreviewTemplate);
     const cardModal = new CatalogItem(cloneTemplate(cardPreviewTemplate), {
-      onClick: () => events.emit('basket:changed', item)
-    }, item?.category);
+      onClick: () => {
+        appState.basket.addItem(item.id);
+        events.emit('basket:changed', item);
+        modal.close();
+      }
+    }, item.category);
+
+    if (appState.basket.items.includes(item.id)) cardModal.disabled();
 
     modal.render({
       content: cardModal.render({
@@ -83,10 +100,41 @@ events.on('preview:changed', (item: IProductItem) => {
       })
     })
   }
-
+  
   if (item) showItem(item);
   else modal.close();
 })
+
+////////// События корзины //////////
+events.on('basket:open', () => {
+  modal.render({
+		content: createElement<HTMLElement>('div', {}, [
+			basket.render(),
+		]),
+	});
+});
+
+events.on('basket:changed', () => {
+  basketCounter.counter = appState.basket.items.length; 
+
+  basket.items = appState.basket.items.map((id: string, index: number) => {
+    const basketItem = new BasketItem(cloneTemplate(cardCBasketTemplate), {
+      onClick: () => appState.basket.deleteItem(id)
+    })
+
+    const item = appState.catalog.findById(id);
+
+    basketItem.listNumber = index + 1;
+
+    return basketItem.render({
+      title: item.title,
+      price: item.price,
+    })
+  });
+
+  basket.selected = appState.basket.items.length === 0;
+  basket.total = appState.basket.getTotal(appState.catalog);
+});
 
 ////////// Получение даннных с сервера //////////
 serviceModel
