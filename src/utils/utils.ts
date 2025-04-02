@@ -1,3 +1,5 @@
+import parsePhoneNumberFromString from "libphonenumber-js";
+
 export function pascalToKebab(value: string): string {
     return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
 }
@@ -133,3 +135,8 @@ export function createElement<
     }
     return element;
 }
+
+export function validatePhone(phone: string): boolean {
+    const phoneNumber = parsePhoneNumberFromString(phone, "RU"); // RU — код страны
+    return phoneNumber ? phoneNumber.isValid() : false;
+  }
